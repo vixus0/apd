@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ resource|title }}: {{ item.name|title }}{% endblock %}
+{% block main %}
+      <section class="resource">
+        <h2 class="h2-title">
+          <a href="{{ resource_href }}">{{ resource }}</a><a href="{{ item.href }}">{% block name %}{{ item.name|title }}{% endblock %}</a>
+        </h2>
+        <article class="resource-details">
+        {% block details %}
+          <dl>
+          {% for key,val in item.items() %}
+            {% if not key.startswith('_') and key not in ['id', 'key', 'href', 'code','name'] %}
+            <dt>{{ key|title }}</dt>
+            <dd>
+              {% if key in item._links %}
+              <a href="{{ item._links[key] }}">{{ val|string }}</a>
+              {% else %}
+              {{ val|string }}
+              {% endif %}
+            </dd>
+            {% endif %}
+          {% endfor %} 
+          </dl>
+        {% endblock %}
+        </article>
+        {% block related %}
+        {% for rel,br in item._backrefs.items() %}
+        {% if br.count() > 0 %}
+        <article class="resource-related">
+          <h3>Related {{ rel|title }}</h3>
+          <ul class="link-list">
+            {% for o in br %}
+            <li><a href="{{ url_for('apd_view', resource=br.model_class.modelname(), rid=o.get_key()) }}">{{ o.get_name()|string|title }}</a></li>
+            {% endfor %}
+          </ul>
+        </article>
+        {% endif %}
+        {% endfor %}
+        {% endblock %}
+      </section>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base_resource.html" %}
+{% block related %}
+{% set pests = g.item.pests.select().join(Pest).order_by(Pest.orderfield()) %}
+{% if pests.count() > 0 %}
+<article class="resource-related">
+  <h3>Pest Threats</h3>
+  <ul class="link-list">
+    {% for o in pests: %}
+    {% if o.pest.name != 'N/A' %}
+    <li>
+      <a href="{{ url_for('apd_view', resource='pest', rid=o.pest.get_key()) }}">{{ o.pest.name }}</a>
+    </li>
+    {% endif %}
+    {% endfor %}
+  </ul>
+</article>
+{% endif %}
+{% set apps = map_query(
+    Application.select(
+      Application, Crop, Pest, Product, Method
+    )
+    .join(Crop)
+    .switch(Application).join(Pest)
+    .switch(Application).join(Product)
+    .switch(Application).join(Method)
+    .where((Crop.keyfield() == g.item.get_key()))
+    .order_by(Product.orderfield())
+    , 'product')
+%}
+{% if apps %}
+<article class="resource-related">
+  <h3>Treatment Products</h3>
+  <dl class="scroll-list">
+    {% for product,rows in apps.items() %}
+    {% set prod_key = rows[0].product.get_key() %}
+    <dt><a class="link-icon" rel="product" title="Product" href="{{ url_for('apd_view', resource='product', rid=prod_key) }}">{{ product }}</a></dt>
+    <dd>
+      <ul>
+        {% for row in rows %}
+        <li>
+          <a class="link-icon" rel="method" title="Method" href="{{ url_for('apd_view', resource='method', rid=row.method.get_key()) }}">{{ row.method.name }}</a>
+          {% if row.pest.name != 'N/A' %}
+          <a class="link-icon" rel="pest" title="Pest" href="{{ url_for('apd_view', resource='pest', rid=row.pest.get_key()) }}">{{ row.pest.name }}</a>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </dd>
+    {% endfor %}
+  </dl>
+</article>
+{% endif %}
+{% endblock %}

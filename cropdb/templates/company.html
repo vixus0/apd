@@ -1,0 +1,20 @@
+{% extends "base_resource.html" %}
+{% block related %}
+{% set brands = g.item.brands.select().join(Product).order_by(Product.name) %}
+{% if brands.count() > 0 %}
+<article class="resource-related">
+  <h3>Related Products</h3>
+  <ul>
+    {% for o in brands %}
+    {% set name = o.name|string %}
+    <li>
+      <a href="{{ url_for('apd_view', resource='product', rid=o.product.get_key()) }}">{{ o.product.name }}</a>
+    {% if name != 'none' and name != 'None' %}
+      branded <a href="{{ url_for('apd_view', resource='brand', rid=o.get_key()) }}">{{ name }}</a>
+    {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</article>
+{% endif %}
+{% endblock %}

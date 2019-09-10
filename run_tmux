@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+session="${USER}-cropdb"
+tmux="tmux -f $XDG_CONFIG_HOME/tmux/local.conf"
+
+$tmux new-session -d -s $session
+
+$tmux send-keys "bash" C-m
+$tmux send-keys "va" C-m
+$tmux send-keys "CROPDB_SETTINGS='../cropdb.cfg' ./run" C-m
+
+$tmux split-window -t $session:1 bash
+$tmux send-keys "va" C-m
+$tmux send-keys "cd javascript" C-m
+$tmux send-keys "watchmedo shell-command --patterns='*.js' --command='bash ../compile_js'" C-m
+
+$tmux split-window -t $session:1 bash
+$tmux send-keys "va" C-m
+$tmux send-keys "cd scss" C-m
+$tmux send-keys "python -mscss -w ./ -o ../cropdb/static/" C-m

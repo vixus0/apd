@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Welcome{% endblock %}
+{% block main %}
+<h2 class="h2-title">
+  <div class="h2-content">Welcome</div>
+</h2>
+
+<h3>About the APD</h3>
+<p>
+The APD is a comprehensive database of agrochemical products and companies,
+updated regularly by Cropnosis.
+The database includes annual sales information and catalogues the relationships
+between companies, brands and chemical products. 
+</p>
+
+<h3>Subscriptions</h3>
+<p>
+{% if 'user' in g %}
+If there are issues with your subscription, or you would like to change the
+resources you are currently subscribed to, please
+<a class="bold" href="mailto:contact@cropnosis.com">contact us</a>.
+{% else %}
+The APD is a subscription-based service, meaning you only pay for the data you require. 
+For further information and to subscribe, please
+<a class="bold" href="mailto:contact@cropnosis.com">contact us</a>.
+{% endif %}
+</p>
+{% endblock %}

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+echo -n "Compiling javascript: "
+
+outdir="../cropdb/static"
+
+for f in *.js; do
+  bn=$(basename $f)
+  out="$outdir/$bn"
+
+  rm -f $out
+
+  cpp -xc -P $f -o /tmp/$bn
+  python -mjsmin /tmp/$bn > $out
+
+  rm -f /tmp/$bn
+  echo -n "$bn "
+done
+
+echo " done"

@@ -1,0 +1,38 @@
+{% extends "base_resource.html" %}
+{% block related %}
+{% set apps = map_query(
+    Application.select(
+      Application, Crop, Pest, Product, Method
+    )
+    .join(Crop)
+    .switch(Application).join(Pest)
+    .switch(Application).join(Product)
+    .switch(Application).join(Method)
+    .where((Method.keyfield() == g.item.get_key()))
+    .order_by(Product.orderfield())
+    , 'product')
+%}
+{% if apps %}
+<article class="resource-related">
+  <h3>Products</h3>
+  <dl class="scroll-list">
+    {% for product,rows in apps.items() %}
+    {% set prod_key = rows[0].product.get_key() %}
+    <dt><a class="link-icon" rel="product" title="Product" href="{{ url_for('apd_view', resource='product', rid=prod_key) }}">{{ product }}</a></dt>
+    <dd>
+      <ul>
+        {% for row in rows %}
+        <li>
+          <a class="link-icon" rel="crop" title="Crop" href="{{ url_for('apd_view', resource='crop', rid=row.crop.get_key()) }}">{{ row.crop.name }}</a>
+          {% if row.pest.name != 'N/A' %}
+          <a class="link-icon" rel="pest" title="Pest" href="{{ url_for('apd_view', resource='pest', rid=row.pest.get_key()) }}">{{ row.pest.name }}</a>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </dd>
+    {% endfor %}
+  </dl>
+</article>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'admin.html' %}
+{% block content %}
+{% if users %}
+<div class="toggle">
+  <input type="checkbox" id="new-toggle" class="toggle-cb" {% if create_form.errors %}checked{% endif %} />
+  <label for="new-toggle">Create User</label>
+  <div class="toggle-body">
+    {% if new_user %}
+    <div class="message">
+      Created new user {{new_user.email}}.
+    </div>
+    {% endif %}
+    {% if create_form.errors %}
+    <div class="message error">
+      {% for k,v in create_form.errors.items() %}
+        {% for err in v %}
+        {{err}}<br/>
+        {% endfor %}
+      {% endfor %}
+    </div>
+    {% endif %}
+    <form method="POST" action="/admin/users">
+      <input type="text" style="display: none"/>
+      <input type="password" style="display: none"/>
+      <input type="hidden" name="_check" value="{{ g.user.csrf }}" />
+      <fieldset>
+        <legend>{{ create_form.new_email.label }}</legend>
+        <div>{{ create_form.new_email(placeholder='test@example.com') }}</div>
+      </fieldset>
+      <fieldset>
+        <legend>{{ create_form.new_password.label }}</legend>
+        <div>{{ create_form.new_password(placeholder='Leave blank for activation') }}</div>
+      </fieldset>
+      <button type="submit">Create New User</button>
+    </form>
+  </div>
+</div>
+
+<nav class="page-nav">
+</nav>
+
+<ol class="resource-list">
+  {% for u in users %}
+  <li class="resource-list-item">
+    <a class="{{ loop.cycle('bg-p-1', 'bg-p-2') }}" href="{{ url_for('admin_single_user', user_id=u.id) }}">
+    <span>{{ u.email }}</span>
+    <span class="user-status">
+      {% for s in ['active', 'banned', 'admin'] %}
+      <span data-status="{{ u[s]|lower }}" class="status-{{s}}">{{ s|capitalize }}</span>
+      {% endfor %}
+    </span>
+    </a>
+  </li>
+  {% endfor %}
+</ol>
+{% endif %}
+{% endblock %}

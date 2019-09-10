@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+DBNAME="cropdb"
+DBUSER="cropnosis"
+
+# Check if DB exists
+check=$( psql -U postgres -c '\l' | grep $DBNAME )
+
+if test -n "$check"; then
+  echo "Dropping database..."
+  su postgres -c "dropdb $DBNAME; exit $?" || exit
+
+  echo "Creating database..."
+  su postgres -c "createdb $DBNAME -O $DBUSER"
+else
+  echo "No such database."
+fi

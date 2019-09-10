@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block main %}
+  <h2 class="h2-title">
+    <div class="h2-content">Confirm Logout</div>
+  </h2>
+  <form method="POST" action="/user/logout">
+    <input type="hidden" name="_check" value="{{ g.user.csrf }}" />
+    <input type="hidden" name="next" value="{{ next_url() }}" />
+    <div class="button-list">
+      <button type="submit" name="confirm" value="accept">Log Out</button><button type="submit" name="confirm" value="reject">Return</button>
+    </div>
+  </form>
+{% endblock %}

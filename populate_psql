@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+DBNAME=${DBNAME:-cropdb}
+DBUSER=${DBUSER:-$DBNAME}
+
+DUMPS="./data/psql/cropdb_data.psql"
+
+for DUMP in $DUMPS; do
+  echo "Restoring $DUMP"
+  psql -U $DBUSER -d $DBNAME -f $DUMP
+done

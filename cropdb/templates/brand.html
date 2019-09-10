@@ -1,0 +1,9 @@
+{% extends "base_resource.html" %}
+{% block details %}
+      <dl>
+        <dt>Company</dt>
+        <dd><a href="{{ item._links.company }}">{{ item.company }}</a></dd>
+        <dt>Product</dt>
+        <dd><a href="{{ item._links.product }}">{{ item.product }}</a></dd>
+      </dl>
+{% endblock %}

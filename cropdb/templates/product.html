@@ -1,0 +1,116 @@
+{% extends "base_resource.html" %}
+{% set sales_count = g.item.sales.count() %}
+{% if sales_count > 0 %}
+{% set sales = g.item.sales.order_by(Sales.year) %}
+{% endif %}
+{% block head %}
+    {% if sales_count > 0 %}
+    <script src="static/Chart.min.js"></script>
+    <script src="static/sales.js"></script>
+    <script>
+      var years = [{% for s in sales %}{{s.year}},{% endfor %}];
+      var cost_data = [{% for s in sales %}{{s.cost}},{% endfor %}];
+      var weight_data = [{% for s in sales %}{{s.weight}},{% endfor %}];
+      window.onload = function () { 
+        generate_sales(years, cost_data, weight_data);
+      };
+    </script>
+    {% endif %}
+{% endblock %}
+{% block details %}
+          <dl>
+            <dt>Chemical Active Group</dt><dd><a href="{{ item._links.chemical }}">{{ item.chemical }}</a></dd>
+            <dt>Application Rate</dt><dd>{{ item.rate }} <em class="fg-p-1">gAI/ha</em></dd>
+            <dt>Launch Year</dt><dd>{{ item.launch_year }}</dd>
+            <dt>Comment</dt><dd class="long-text">{{ item.comment }}</dd>
+            <dt>Product Status</dt><dd>{{ item.product_status }}</dd>
+            <dt>Sales Status</dt><dd>{{ item.sales_status }}</dd>
+          </dl>
+{% endblock %}
+{% block related %}
+        {% if sales_count > 0 %}
+        <article id="sales" class="resource-related">
+          <h3>Annual Sales</h3>
+          <noscript>
+          <table id="sales-data">
+            <thead>
+              <tr>
+                <td>Year</td>
+                <td>Cost</td>
+                <td>Weight</td>
+              </tr>
+            </thead>
+            <tbody>
+              {% for o in sales %}
+              <tr>
+                <td>{{ o.year }}</td>
+                <td>{{ o.cost }} {{ o.currency }}</td>
+                <td>{{ o.weight }} {{ o.weight_units }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          </noscript>
+          <div class="graph">
+            <h4>Value (Million USD)</h4>
+            <canvas id="cost-graph" width="480" height="250"></canvas>
+          </div>
+          <div class="graph">
+            <h4>Weight (Metric tonnes)</h4>
+            <canvas id="weight-graph" width="480" height="250"></canvas>
+          </div>
+        </article>
+        {% endif %}
+        {% set brands = g.item.brands.select(Brand, Company).join(Company).order_by(Company.name) %}
+        {% if brands.count() > 0 %}
+        <article id="brands" class="resource-related">
+          <h3>Manufacturers</h3>
+          <ul>
+            {% for o in brands %}
+            {% set name = o.name|string %}
+            <li>
+              <a href="{{ url_for('apd_view', resource='company', rid=o.company.get_key()) }}">{{ o.company.name }}</a>
+            {% if name != 'none' and name != 'None' %}
+              as <a href="{{ url_for('apd_view', resource='brand', rid=o.get_key()) }}">{{ name }}</a>
+            {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </article>
+        {% endif %}
+        {% set apps = map_query(
+            Application.select(
+              Application, Crop, Pest, Product, Method
+            )
+            .join(Crop)
+            .switch(Application).join(Pest)
+            .switch(Application).join(Product)
+            .switch(Application).join(Method)
+            .where((Product.keyfield() == g.item.get_key()))
+            .order_by(Crop.orderfield())
+            , 'method')
+        %}
+        {% if apps %}
+        <article class="resource-related">
+          <h3>Applications</h3>
+          <dl class="scroll-list">
+            {% for method,rows in apps.items() %}
+            {% set method_key = rows[0].method.get_key() %}
+            <dt><a class="link-icon" rel="method" title="Method" href="{{ url_for('apd_view', resource='method', rid=method_key) }}">{{ method }}</a></dt>
+            <dd>
+              <ul>
+                {% for row in rows %}
+                <li>
+                  <a class="link-icon" rel="crop" title="Crop" href="{{ url_for('apd_view', resource='crop', rid=row.crop.get_key()) }}">{{ row.crop.name }}</a>
+                  {% if row.pest.name != 'N/A' %}
+                  <a class="link-icon" rel="pest" title="Pest" href="{{ url_for('apd_view', resource='pest', rid=row.pest.get_key()) }}">{{ row.pest.name }}</a>
+                  {% endif %}
+                </li>
+                {% endfor %}
+              </ul>
+            </dd>
+            {% endfor %}
+          </dl>
+        </article>
+        {% endif %}
+{% endblock %}

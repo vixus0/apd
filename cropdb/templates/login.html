@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block main %}
+  {% if form.errors %}
+  <div class="message error">{{ form.errors.email[0] }}</div>
+  {% endif %}
+
+  <form method="POST" action="/user/login">
+    {{ form.next }}
+    <div class="input">
+      {{ form.email.label }}{{ form.email }}
+    </div>
+    <div class="input">
+      {{ form.password.label }}{{ form.password }}
+    </div>
+    <div class="input"><button type="submit" id="login">Login</button></div>
+  </form>
+{% endblock %}

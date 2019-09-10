@@ -1,0 +1,70 @@
+{% extends 'admin.html' %}
+{% block head %}
+<script src="static/admin.js"></script>
+<script>
+window.onload=function(){A.init()};
+</script>
+{% endblock %}
+{% block content %}
+<section class="resource">
+  <article class="resource-details">
+    <dl>
+      {% for a in ['email', 'created_date', 'banned_date', 'active', 'banned', 'admin', 'wrong_logins'] %}
+      <dt>{{ a|title }}</dt><dd id="data-{{a}}" data-field="{{ a }}">{{ user[a] }}</dd>
+      {% endfor %}
+      <dt>Sessions</dt>
+      <dd>
+        <a href="{{ url_for('admin_sessions', a='active', user=user.get_key()) }}">Active</a> /
+        <a href="{{ url_for('admin_sessions', user=user.get_key()) }}">All</a>
+      </dd>
+      {% if not user.is_admin %}
+      <dt>Actions</dt>
+      <dd>
+        <div class="button-list" style="display:inline-block">
+          <button type="button" name="user-action" data-action="activate">Activate</button><button type="button" name="user-action" data-action="inactivate">Inactivate</button>
+        </div>
+        <div class="button-list" style="display:inline-block">
+          <button type="button" name="user-action" data-action="ban">Ban</button><button type="button" name="user-action" data-action="unban">Unban</button>
+        </div>
+      </dd>
+      {% endif %}
+    </dl>
+  </article>
+  {% if not user.is_admin %}
+  <article class="resource-related">
+    <h3>Subscriptions</h3>
+    <form id="subscriptions" data-user="{{ user.get_key() }}">
+      <button id="update-subs" type="button">Update</button>
+      <fieldset style="float:right">
+        Extend for: 
+        {% for months in [1,3,6,12] %}
+        <input type="radio" name="extend-months" id="extend-months-{{months}}" value="{{months}}" /><label for="extend-months-{{months}}" style="margin-right:0.5em">{{months}}</label> 
+        {% endfor %}
+        months
+      </fieldset>
+      <table style="display:block;height:20em;overflow:auto">
+        <thead>
+          <tr>{% for res in sub_keys %}<td>{{res|title}}</td>{% endfor %}</tr>
+        </thead>
+        <tbody>
+          <tr>
+            {% for res in sub_keys %}
+            {% set items = sub[res] %}
+            <td valign="top">
+              <input type="checkbox" class="highlight" name="sub-cb" data-resource="{{res}}" id="{{res}}-all" value="-1"/>
+              <label for="{{res}}-all" id="lbl-{{res}}-all" style="font-weight:bold">ALL</label><br/>
+              <div id="{{res}}-rest">
+              {% for item in items %}
+              <input type="checkbox" class="highlight" name="sub-cb" data-resource="{{res}}" id="{{res}}-{{item.id}}" value="{{item.id}}"/>
+              <label for="{{res}}-{{item.id}}" id="lbl-{{res}}-{{item.id}}">{{item.name}}</label><br/>
+              {% endfor %}
+              </div>
+            </td>
+            {% endfor %}
+        </tbody>
+      </table>
+    </form>
+  </article>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}{{ resource|plural|title }}: Page {{ page }}{% endblock %}
+
+{% block head %}
+{% if filter_form %}
+<script src="static/filtering.js"></script>
+<script>
+var form={{ filter_form|safe }};window.onload=function(){F.init(form);};
+</script>
+{% endif %}
+{% endblock %}
+
+{% block main %}
+  <h2 class="h2-title">
+    <a href="{{ url_for('apd_list', resource=resource) }}">{{ resource|plural|title }}</a>
+    {% for l in '0ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+    {% if l == request.args.get('sw') %}
+    <a class="prefix-nav-current" href="{{ url_for('apd_list', resource=resource, sw=l) }}">{{ l }}</a>
+    {% else %}
+    <a class="prefix-nav" href="{{ url_for('apd_list', resource=resource, sw=l) }}">{{ l }}</a>
+    {% endif %}
+    {% endfor %}
+  </h2>
+
+  {% if filter_form %}
+  <div class="toggle">
+    <input type="checkbox" id="filter-toggle" class="toggle-cb" />
+    <label for="filter-toggle">Filter Results</label>
+    <div id="filter-container" class="toggle-body"></div>
+  </div>
+  {% endif %}
+
+  {% if count > 0 %}
+    {% block pagenav %}
+    <nav class="page-nav">
+      <div class="item-count">{{ start }}-{{ end }} of {{ count }} items</div>
+      <div class="page-links">
+      {% if page > 1 %}
+        <a href="{{ prev }}" class="prev-page" title="Previous page">Previous</a>
+      {% endif %}
+      <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+      {% if page < total_pages %}
+        <a href="{{ next }}" class="next-page" title="Next page">Next</a>
+      {% endif %}
+      </div>
+    </nav>
+    {% endblock %}
+    <ol class="resource-list" start="{{ start }}">
+      {% for item in items %}
+      <li class="resource-list-item">
+        <a class="{{ loop.cycle('bg-p-1', 'bg-p-2') }}" href="{{ item.href }}">{{ item.name }}</a>
+      </li>
+      {% endfor %}
+    </ol>
+    {{ self.pagenav() }}
+  {% else %}
+    <div class="center">No items available.</div>
+  {% endif %}
+{% endblock %}

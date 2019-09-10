@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{% block title %}Home{% endblock %} - Cropnosis APD</title>
+    <link rel="stylesheet" href="static/style.css" />
+    {% include "favicon.html" %}
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <header>
+      <nav class="apd-nav">
+        <a href="/" title="Home" class="hide-text" id="home-link">APD</a>
+        {% if 'user' in g and 'resources' in g.links %}
+          {% for item in g.links.resources %}
+          <a href="{{ item.href }}" title="{{ item.text|plural }}">{{ item.text|plural }}</a>
+          {% endfor %}
+          <form action="{{ url_for('apd_search') }}" method="GET">
+            <input id="mini-search" type="search" name="q" placeholder="Search..."/>
+          </form>
+        {% else %}
+        <div class="nav-text"><strong>Subscribers:</strong> Please login to access data.</div>
+        {% endif %}
+      </nav>
+      <nav class="user-nav">
+      {% if 'user' in g %}
+        <div class="nav-text">{{ g.user.email }}</div>
+        {% if g.user.is_admin %}
+        <a href="{{ url_for('admin') }}" title="Admin Panel">Admin</a>
+        {% endif %}
+        {% for l in ['profile', 'logout'] %}
+        {% set link = g.links.user[l] %}
+        <a href="{{ link.href }}" title="{{ link.text }}">{{ link.text }}</a>
+        {% endfor %}
+      {% else %}
+        {% set link = g.links.user.login %}
+        <a href="{{ link.href }}" title="{{ link.text }}">{{ link.text }}</a>
+      {% endif %}
+      </nav>
+      {% block header %}{% endblock %}
+    </header>
+    <main>
+      <h1 id="cropnosis-logo"><a href="{{ url_for('index') }}">Agrochemical Product Database</a></h1>
+      {% block main %}{% endblock %}
+    </main>
+    <footer>
+      {% block footer %}
+      &copy; Copyright 2015 by Cropnosis.
+      {% endblock %}
+    </footer>
+  </body>
+</html>

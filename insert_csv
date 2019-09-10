@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+
+#Products missing CPNcode get chemical_id OTHS and prodstatus In Development
+
+import sys, csv
+
+from cropdb import db
+from cropdb.apd.models import Product, Chemical, Sales
+
+SEP = '--'
+
+sales_years = range(9,15)
+
+def prnl(*s):
+    print(*s, end=' ')
+
+with open(sys.argv[1]) as csvfile:
+    reader = csv.DictReader(csvfile)
+
+    db.connect()
+    
+    for row in reader:
+        check = ''.join([row[f] for f in ['Cropnosis name', 'CPNcode']]).strip()
+
+        if check == '':
+            continue
+
+        prnl(row['Cropnosis name'], SEP)
+
+        # Determine chemical type
+        cpn = row['CPNcode'][:4]
+
+        if 'OTH' in cpn or 'NONE' in cpn or cpn == '':
+            cpn = 'OTHS'
+
+        chem_type = cpn
+
+        try:
+            chem = Chemical.get(Chemical.type == chem_type)
+        except Chemical.DoesNotExist:
+            print('NO SUCH CHEMICAL', chem_type, SEP, 'FAIL')
+            continue
+
+        prnl(chem_type, SEP)
+
+        prod_match = '{}'.format(row['Cropnosis name'])
+
+        # Find or create product
+        try:
+            prod = Product.get(Product.name == prod_match)
+            prnl(prod.id, 'exists')
+        except Product.DoesNotExist:
+            prod = Product.create(
+                    code = row['Pcode'], 
+                    name = row['Cropnosis name'],
+                    chemical = chem,
+                    comment = 'No description.'
+                    )
+            prnl(prod.id, 'create')
+
+        # Update sales data
+        for year in sales_years:
+            real_year = 2000 + year
+            field = '{:02d}Sales'.format(year)
+
+            try:
+                cost = float(row[field])
+            except ValueError:
+                cost = 0
+
+            try:
+                sales = Sales.get(Sales.product == prod, Sales.year == real_year)
+            except Sales.DoesNotExist:
+                sales = Sales(
+                        product = prod,
+                        year = real_year
+                        )
+
+            sales.cost = cost;
+            sales.save()
+
+            prnl(field)
+
+        print(SEP, 'DONE')
+
+    db.close()

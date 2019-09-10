@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+echo -n "Compiling SCSS: "
+
+outdir="../cropdb/static"
+
+for f in *.scss; do
+  bn=$(basename -s ".scss" $f)
+  out="$outdir/${bn}.css"
+
+  rm -f $out
+
+  python -mscss -o $out $f
+
+  echo -n "$bn "
+done
+
+echo " done"
+

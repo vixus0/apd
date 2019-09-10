@@ -1,0 +1,22 @@
+{% extends 'admin.html' %}
+{% block content %}
+{% if sessions %}
+<table>
+  <thead>
+    <tr><td>User</td><td>Start</td><td>End</td><td>Location</td></tr>
+  </thead>
+  <tbody>
+    {% for s in sessions %}
+    <tr {% if s.active == False %}style="color: #cccccc"{% endif %}>
+      <td><a href="{{ url_for('admin_single_user', user_id=s.user) }}">{{ s.email }}</a></td>
+      <td>{{ s.start_time }}</td>
+      <td>{{ s.end_time }}</td>
+      <td>{{ s.location }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+No sessions.
+{% endif %}
+{% endblock %}

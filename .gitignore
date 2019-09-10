@@ -1,0 +1,3 @@
+*__pycache__
+cropdb/static/*.js
+cropdb/static/*.css

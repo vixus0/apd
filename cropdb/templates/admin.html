@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Admin{% endblock %}
+{% block main %}
+{% include 'nav_admin.html' %}
+{% block content %}
+<h3>Manage Users</h3>
+<p>Use this to modify user subscriptions and to check user details.</p>
+
+<h3>Active Sessions</h3>
+<p>View currently active login sessions.</p>
+
+<h3>All Sessions</h3>
+<p>View last 100 login sessions.</p>
+
+{% endblock %}
+{% endblock %}
